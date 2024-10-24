@@ -6,6 +6,7 @@ import os
 import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+import logging
 
 
 MODEL_PATH = "models/"
@@ -18,57 +19,93 @@ models = {
 if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
-# Модель гиперпараметров для обучения
-class ModelParams(BaseModel):
-    mmodel_type: str
-    params: Optional[dict] = Field(default={})
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Модель запроса для предсказания
 class PredictionRequest(BaseModel):
-    mmodel_name: str
-    input_data: List[List[float]]
+    mmodel_name: str = Field(description="Имя обученной модели")
+    input_data: List[List[float]] = Field(description="Входные данные для предсказания")
 
-
-class User(BaseModel): # Модель json данных
-    name : str
-    age : int = 18
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [
-                {
-                    "name": "Gleb",
-                    "age": 25
-                }
-            ]
+    class Config:
+        schema_extra = {
+            "example": {
+                "mmodel_name": "random_forest_model.pkl",
+                "input_data": [[0, 0], [1, 1], [2, 2]]
+            }
         }
-    }
 
+
+class ModelParams(BaseModel):
+    mmodel_type: str = Field(description="Тип модели")
+    params: Optional[dict] = Field(default={}, description="Гиперпараметры для модели")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "mmodel_type": "random_forest",
+                "params": {"n_estimators": 100, "max_depth": 5}
+            }
+        }
+
+        
 app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the ML Model Management API!"}
 
 # Эндпоинт для обучения
 @app.post("/train/", status_code=201)
 async def train_model(params: ModelParams):
-    mmodel_type = params.mmodel_type
+    try:
+        mmodel_type = params.mmodel_type
+        logger.info(f"Starting training for {mmodel_type}")
 
-    if mmodel_type not in models:
-        raise HTTPException(status_code=400, detail="Model type not supported")
+        if mmodel_type not in models:
+            logger.error(f"Unsupported model type: {mmodel_type}")
+            raise HTTPException(status_code=400, detail="Model type not supported")
 
-    ModelClass = models[mmodel_type]
+        ModelClass = models[mmodel_type]
+        model = ModelClass(**params.params)
 
-    model = ModelClass(**params.params)
+        X_train = [[0, 0], [1, 1], [2, 2]]
+        y_train = [0, 1, 1]
+        model.fit(X_train, y_train)
 
-    # Рандомные данные, надо поменять!
-    X_train = [[0, 0], [1, 1], [2, 2]]
-    y_train = [0, 1, 1]
+        mmodel_name = f"{mmodel_type}_model.pkl"
+        model_path = os.path.join(MODEL_PATH, mmodel_name)
+
+        with open(model_path, "wb") as f:
+            pickle.dump(model, f)
+
+        logger.info(f"Model {mmodel_type} trained and saved as {mmodel_name}")
+        return {"message": f"Model {mmodel_type} trained and saved as {mmodel_name}"}
+
+    except Exception as e:
+        logger.error(f"Error during training: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Эндпоинт для переобучения
+@app.post("/retrain/{mmodel_name}", status_code=200)
+async def retrain_model(mmodel_name: str):
+    model_path = os.path.join(MODEL_PATH, mmodel_name)
+
+    if not os.path.exists(model_path):
+        raise HTTPException(status_code=404, detail="Model not found")
+
+    with open(model_path, "rb") as f:
+        model = pickle.load(f)
+
+    X_train = [[1, 0], [0, 1], [2, 3]]
+    y_train = [1, 0, 1]
+
     model.fit(X_train, y_train)
 
-    mmodel_name = f"{mmodel_type}_model.pkl"
-    model_path = os.path.join(MODEL_PATH, mmodel_name)
     with open(model_path, "wb") as f:
         pickle.dump(model, f)
 
-    return {"message": f"Model {mmodel_type} trained and saved as {mmodel_name}"}
+    return {"message": f"Model {mmodel_name} retrained successfully"}
 
 # Эндпоинт для списка доступных моделей
 @app.get("/models/")
