@@ -1,0 +1,152 @@
+syntax = "proto3";
+
+message Array2Df {
+  repeated Array1Df rows = 1;
+}
+
+message Array1Df {
+  repeated float values = 1;
+}
+
+message Array1Di {
+  repeated int32 values = 1;
+}
+
+message TrainInput {
+    string model_name = 1;
+    string dataset_name = 2;
+    string parameters = 3;
+}
+
+message TrainOutput {
+    string message = 1;
+    string model_id = 2;
+}
+
+message RetrainInput {
+    string model_id = 1;
+    string dataset_name = 2;
+    string parameters = 3;
+}
+
+message RetrainOutput {
+    string model_id = 1;
+}
+
+message DeleteModelInput {
+    string model_id = 1;
+}
+
+message DeleteModelOutput {
+    string model_id = 1;
+}
+
+message PredictInput {
+    string model_id = 1;
+    Array2Df X = 2;
+}
+
+message PredictOutput {
+    repeated float prediction = 1;
+}
+
+message PredictProbaInput {
+    string model_id = 1;
+    Array2Df X = 2;
+}
+
+message PredictProbaOutput {
+    repeated float probas = 1;
+}
+
+message Empty1 {}
+
+message ModelList {
+    repeated string models = 1;
+}
+
+message Empty2 {}
+
+message AvailableModels {
+    repeated string models = 1;
+}
+
+message Empty3 {}
+
+message AvailableDatasets {
+    repeated string datasets = 1;
+}
+
+message GetDataName {
+    string dataset_name = 1;
+}
+
+message Dataset{
+    Array2Df X = 1;
+    Array1Di y = 2;
+}
+
+message ModelID {
+    string model_id = 1;
+}
+
+message DatasetName {
+    string dataset = 1;
+}
+
+message Empty4 {}
+
+message ServerStatus {
+    float cpu = 1;
+    map<string, float> mem = 2;
+}
+
+message Model {
+    string model_id = 1;
+}
+
+message ModelDocString {
+    string docsting = 1;
+}
+
+message UserDataset {
+    Array2Df X = 1;
+    Array1Di y = 2;
+    string dataset_name = 3; 
+}
+
+message CreateDatasetOutput {
+    string dataset_name = 1;
+}
+
+message DeleteDatasetInput {
+    string dataset_name = 1;
+}
+
+message DeleteDatasetOutput {
+    string dataset_name = 1;
+}
+
+message UserDatasetsInput {}
+
+message UserDatasetsOutput {
+    repeated string datasets = 1;
+}
+
+service MopsApp {
+    rpc Train(TrainInput) returns (TrainOutput);
+    rpc Predict(PredictInput) returns (PredictOutput);
+    rpc Retrain(RetrainInput) returns (RetrainOutput);
+    rpc DeleteModel(DeleteModelInput) returns (DeleteModelOutput);
+    rpc List_trained_models(Empty1) returns (ModelList);
+    rpc List_available_models(Empty2) returns (AvailableModels);
+    rpc List_available_datasets(Empty3) returns (AvailableDatasets);
+    rpc GetDataset(GetDataName) returns (Dataset);
+    rpc GetModelsDataset(ModelID) returns (DatasetName);
+    rpc PredictProba(PredictProbaInput) returns (PredictProbaOutput);
+    rpc HealthCheck(Empty4) returns (ServerStatus);
+    rpc ShowDocString(Model) returns (ModelDocString);
+    rpc CreateDataset(UserDataset) returns (CreateDatasetOutput);
+    rpc DeleteDataset(DeleteDatasetInput) returns (DeleteDatasetOutput);
+    rpc List_user_datasets(UserDatasetsInput) returns (UserDatasetsOutput);
+}

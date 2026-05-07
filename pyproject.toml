@@ -1,0 +1,76 @@
+[tool.poetry]
+name = "mops"
+version = "0.1.0"
+description = "MLOps pet project"
+authors = ["Vladislav Bizin <vkbizin@edu.hse.ru>"]
+maintainers = ["Alexandr Atlasov <aaatlasov@edu.hse.ru>", "Alina Prolygina <amprolygina@edu.hse.ru>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://gitlab.com/hse4312544/MLOps#"
+packages = [{ include = "mops"}]
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.2"
+
+[tool.dynamic-versioning]
+enable = true
+source = "mlops.__version__"
+
+[tool.poetry.dependencies]
+boto3 = "^1.28.0"
+python = "^3.11"
+catboost = "1.2.5"
+fastapi = "0.115.4"
+grpcio = "1.68.0"
+humanize = "4.11.0"
+joblib = "1.4.2"
+loguru = "0.7.2"
+matplotlib = "3.9.2"
+numpy = "1.26.4"
+pandas = "2.2.3"
+protobuf = "5.28.3"
+psutil = "6.1.0"
+pydantic = "2.9.2"
+PyYAML= "6.0.2"
+Requests = "2.32.3"
+scikit_learn = "1.5.2"
+setuptools = "65.5.0"
+streamlit = "1.39.0"
+uvicorn = "0.32.0"
+xgboost = "2.1.2"
+clearml = "1.17.0"
+pytest = "8.3.4"
+
+[tool.poetry.dev-dependencies]
+ruff = "^0.8.2"
+
+[tool.poetry.scripts]
+run-server = "mops.backend.run:main"
+run-dashboard = "mops.frontend.run:main"
+
+[tool.ruff]
+line-length = 120
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "N",  # PEP8 naming convetions
+    "D"  # pydocstyle
+]
+ignore = [
+    "C901",  # too complex
+    "W191",  # indentation contains tabs
+    "D401"  # imperative mood
+]
+exclude = [
+    "mops/backend/apps/grpc/proto/server.proto",
+    "mops/backend/apps/grpc/server_pb2_grpc.py",
+    "mops/backend/apps/grpc/server_pb2.py"
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

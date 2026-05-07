@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  server:
+    image: mlops-server
+    container_name: mlops-server
+    build:
+      dockerfile: Dockerfile.server
+    environment:
+      - API_TYPE=fastapi
+      - HOST=0.0.0.0
+      - PORT=9090
+      - MINIO_URL=http://minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - USE_CLEARML=--clearml
+      - CLEARML_API_HOST=https://api.clear.ml
+      - CLEARML_WEB_HOST=https://api.clear.ml
+      - CLEARML_FILES_HOST=https://files.clear.ml
+      - CLEARML_API_ACCESS_KEY=SL2FO6HDG98BJMVFQK0877V6AAQEO7
+      - CLEARML_API_SECRET_KEY=6eOjBL1NeF4gXglmTlSAZV24XQ-EIR7PF-_HGkTNkBbj-ExnL8vTihpebkWbBdygDUs
+    ports:
+      - 9090:9090
+    depends_on:
+      - minio
+
+  dashboard:
+    image: mlops-dashboard
+    container_name: mlops-dashboard
+    build:
+      dockerfile: Dockerfile.dashboard
+    environment:
+      - API_TYPE=fastapi
+      - HOST=server
+      - PORT=9090
+    ports:
+      - 8501:8501
+    depends_on:
+      - server
+
+  minio:
+    image: quay.io/minio/minio
+    container_name: mlops-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server --console-address ":9001" /data 
+    ports:
+      - 9000:9000
+      - 9001:9001

@@ -1,0 +1,25 @@
+# Base Python image
+FROM python:3.11
+
+# Create the application directory
+RUN mkdir /app
+WORKDIR /app
+
+# Copy the project files
+COPY . .
+
+# Install Python dependencies
+RUN pip install --upgrade pip
+RUN pip install .
+
+# Install DVC with S3/MinIO support
+RUN pip install dvc[s3] boto3
+
+# Configure DVC remote storage for MinIO
+RUN dvc remote add -f -d myremote s3://datasets && \
+    dvc remote modify myremote endpointurl "$MINIO_URL" && \
+    dvc remote modify myremote access_key_id "$MINIO_ACCESS_KEY" && \
+    dvc remote modify myremote secret_access_key "$MINIO_SECRET_KEY"
+
+# Pull datasets and models from DVC remote storage at runtime
+CMD dvc pull || echo "DVC pull failed, starting server without pulled datasets" && run-server --api-type $API_TYPE --host $HOST --port $PORT $USE_CLEARML

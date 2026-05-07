@@ -1,0 +1,77 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs
+logs/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+*.swp
+
+# Notebooks
+.ipynb_checkpoints/
+
+# artifacts
+artifacts/models
+artifacts/datasets/*
+!artifacts/datasets/moons
+!artifacts/datasets/xor
+!artifacts/datasets/blobs
+!artifacts/datasets/gauss_quantile
+
+# Cython debug symbols
+cython_debug/
+
+# CatBoost specific files
+catboost_info/
+catboost_info/snapshot*
+catboost_info/time_left*
+catboost_info/learn_error.tsv
+catboost_info/test_error.tsv
+
+# ruff
+.ruff_cache
+
+# test files
+*.ipynb
+.pytest_cache
+
+# Local environment
+venv/
+.venv/
+.env
+
+# Python cache
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Mac
+.DS_Store
+
+# Logs / models / data
+*.log
+*.pkl
+*.joblib
+data/
+datasets/
+models/

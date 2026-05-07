@@ -1,0 +1,15 @@
+logs:
+  backend: logs/backend.log
+  frontend: logs/frontend.log
+
+datasets_root: artifacts/datasets
+
+bucket_names:
+  datasets: datasets
+  models: models
+
+base_datasets:
+  - moons
+  - xor
+  - gauss_quantile
+  - blobs
